@@ -1,6 +1,17 @@
 default:
     @just --list
 
+# プロジェクトルート（親ディレクトリ）に .claude/ をインストールする
+# 使い方: プロジェクト配下に git clone してから just install
+install:
+    #!/usr/bin/env bash
+    dest="$(dirname "$(pwd)")"
+    echo "Installing to: $dest"
+    cp -r .claude "$dest/"
+    cp CLAUDE.md "$dest/CLAUDE.md"
+    cp justfile "$dest/justfile"
+    echo "Done. Edit $dest/.claude/rules/project.md for project-specific settings."
+
 # Codex にタスクファイルを渡して実行する
 # 使い方: just run <task-name>  (.tasks/<task-name>.md を渡す)
 codex-run name:
