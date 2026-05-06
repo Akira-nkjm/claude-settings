@@ -10,6 +10,7 @@ install:
     cp -r .claude "$dest/"
     cp CLAUDE.md "$dest/CLAUDE.md"
     cp justfile "$dest/justfile"
+    cp .gitignore "$dest/.gitignore"
     echo "Done. Edit $dest/.claude/rules/project.md for project-specific settings."
 
 # Codex にタスクファイルを渡して実行する

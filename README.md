@@ -18,6 +18,7 @@ just install
 | `.claude/` | フック・ルール・コマンド一式 |
 | `CLAUDE.md` | Claude Code へのプロジェクト指示 |
 | `justfile` | Codex タスク管理コマンド |
+| `.gitignore` | `.tasks/*.md` 除外ルール |
 
 インストール後は `.claude/rules/project.md` をそのプロジェクト用に編集する。
 
