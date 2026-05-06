@@ -10,7 +10,11 @@ install:
     cp -r .claude "$dest/"
     cp CLAUDE.md "$dest/CLAUDE.md"
     cp justfile "$dest/justfile"
-    cp .gitignore "$dest/.gitignore"
+    if [ -f "$dest/.gitignore" ]; then
+        grep -vxFf "$dest/.gitignore" .gitignore >> "$dest/.gitignore" && echo "Merged .gitignore"
+    else
+        cp .gitignore "$dest/.gitignore"
+    fi
     echo "Done. Edit $dest/.claude/rules/project.md for project-specific settings."
 
 # Codex にタスクファイルを渡して実行する
