@@ -1,0 +1,5 @@
+# 実行中のタスクファイル（ディレクトリ自体は追跡）
+.tasks/*.md
+
+# グローバル gitignore の除外を上書き（設定管理リポジトリなので追跡する）
+!.claude/settings.local.json
