@@ -9,7 +9,11 @@ install:
     echo "Installing to: $dest"
     cp -r .claude "$dest/"
     cp CLAUDE.md "$dest/CLAUDE.md"
-    cp justfile "$dest/justfile"
+    if [ -f "$dest/justfile" ]; then
+        python3 .claude/tools/install/merge_justfile.py "$dest/justfile"
+    else
+        cp justfile "$dest/justfile"
+    fi
     if [ -f "$dest/.gitignore" ]; then
         grep -vxFf "$dest/.gitignore" .gitignore >> "$dest/.gitignore" && echo "Merged .gitignore"
     else
