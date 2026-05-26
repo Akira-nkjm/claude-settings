@@ -1,37 +1,31 @@
 default:
     @just --list
 
-# プロジェクトルート（親ディレクトリ）に .claude/ をインストールする
+# プロジェクトルート（親ディレクトリ）に非破壊でインストールする
 # 使い方: プロジェクト配下に git clone してから just install
+# FORCE=1 で既存ファイルをバックアップ後に上書き、DRY_RUN=1 で差分のみ表示
 install:
-    #!/usr/bin/env bash
-    dest="$(dirname "$(pwd)")"
-    echo "Installing to: $dest"
-    cp -r .claude "$dest/"
-    cp CLAUDE.md "$dest/CLAUDE.md"
-    if [ -f "$dest/justfile" ]; then
-        python3 .claude/tools/install/merge_justfile.py "$dest/justfile"
-    else
-        cp justfile "$dest/justfile"
-    fi
-    if [ -f "$dest/.gitignore" ]; then
-        grep -vxFf "$dest/.gitignore" .gitignore >> "$dest/.gitignore" && echo "Merged .gitignore"
-    else
-        cp .gitignore "$dest/.gitignore"
-    fi
-    echo "Done. Edit $dest/.claude/rules/project.md for project-specific settings."
+    @python3 .claude/tools/install/install.py
 
 # Codex にタスクファイルを渡して実行する
-# 使い方: just run <task-name>  (.tasks/<task-name>.md を渡す)
+# 使い方: just codex-run <task-name>  (.tasks/<task-name>.md を渡す)
 codex-run name:
-    node "$(echo $HOME/.claude/plugins/cache/openai-codex/codex/*/scripts/codex-companion.mjs)" task --write --prompt-file ".tasks/{{ name }}.md"
+    @python3 .claude/tools/codex/run.py "{{ name }}"
 
 # タスクファイルを新規作成する
-# 使い方: just new <task-name>
+# 使い方: just codex-new-task <task-name>
+# FORCE=1 で既存 .tasks/<task-name>.md の上書きを許可
 codex-new-task name:
-    @mkdir -p .tasks
-    @printf "# {{ name }}\n\n## 概要\n\n## 実装方針\n\n## 注意事項\n" > .tasks/{{ name }}.md
-    @echo "Created: .tasks/{{ name }}.md"
+    #!/usr/bin/env bash
+    set -euo pipefail
+    mkdir -p .tasks
+    task=".tasks/{{ name }}.md"
+    if [ -e "$task" ] && [ "${FORCE:-0}" != "1" ]; then
+        echo "Task already exists: $task (set FORCE=1 to overwrite)" >&2
+        exit 1
+    fi
+    printf "# {{ name }}\n\n## 概要\n\n## 実装方針\n\n## 注意事項\n" > "$task"
+    echo "Created: $task"
 
 # 未処理タスク一覧
 codex-tasks:

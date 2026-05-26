@@ -1,5 +1,7 @@
 # Codex 呼び出し手順
 
+> このファイルは **Claude Code から Codex CLI へタスクを委譲する**手順を扱う（Claude 固有のツール呼び出しを含む）。Codex を単体で使う場合の運用は [`../../.codex/README.md`](../../.codex/README.md) を参照。
+
 ## セットアップ → 実行の2ステップ
 
 ### Step 1: `/codex:setup` スキルで初期化
