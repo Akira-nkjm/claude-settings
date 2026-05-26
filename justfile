@@ -31,6 +31,42 @@ codex-new-task name:
 codex-tasks:
     @ls .tasks/*.md 2>/dev/null || echo "no task"
 
+# Codex を git worktree 隔離で実行する（並列実行時に推奨）
+# worktree: .worktrees/<task-name>/、branch: codex/<task-name>
+# 使い方: just codex-run-isolated <task-name>
+codex-run-isolated name:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    task=".tasks/{{ name }}.md"
+    if [ ! -f "$task" ]; then
+        echo "タスクファイルが見つかりません: $task" >&2
+        exit 1
+    fi
+    wt=".worktrees/{{ name }}"
+    branch="codex/{{ name }}"
+    if [ ! -d "$wt" ]; then
+        git worktree add -b "$branch" "$wt" HEAD
+    fi
+    mkdir -p "$wt/.tasks"
+    cp "$task" "$wt/$task"
+    (cd "$wt" && python3 .claude/tools/codex/run.py "{{ name }}")
+    echo "完了: $wt (branch: $branch)"
+    echo "マージ例: git merge --no-ff $branch  または  cd $wt && git diff main"
+    echo "破棄例:   just codex-cleanup-isolated {{ name }}"
+
+# worktree とブランチを削除する
+# 使い方: just codex-cleanup-isolated <task-name>
+codex-cleanup-isolated name:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    wt=".worktrees/{{ name }}"
+    branch="codex/{{ name }}"
+    if [ -d "$wt" ]; then
+        git worktree remove --force "$wt"
+    fi
+    git branch -D "$branch" 2>/dev/null || true
+    echo "削除: $wt, $branch"
+
 # CodeGraph index を作成・再構築する（初回または手動再構築時）
 # 通常はファイル監視で自動更新されるので不要
 codegraph-init:

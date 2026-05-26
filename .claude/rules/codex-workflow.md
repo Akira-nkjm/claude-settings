@@ -25,7 +25,9 @@ just codex-run <task-name>
 > ⚠️ **`Agent(subagent_type: "codex:codex-rescue")` は使わない**
 > サブエージェントは親セッションの Bash 許可リストを継承しないため `just` / `node` が毎回ブロックされる。Bash ツールから直接呼ぶこと。
 
-## 並列実行フロー
+## 並列実行フロー（worktree 隔離が必須）
+
+**並列で複数タスクを走らせる場合は必ず `just codex-run-isolated` を使う**。同一 worktree で複数 Codex を同時実行すると、git index 競合・ファイル上書き・テストの相互汚染が発生する。
 
 ```
 /codex:setup スキル実行（完了待ち）
@@ -34,15 +36,31 @@ Write ツールで .tasks/ にタスクファイルを書く:
   .tasks/task-a.md
   .tasks/task-b.md
   ↓
-run_in_background: true で複数 Bash を並列起動:
-  Bash: just codex-run task-a
-  Bash: just codex-run task-b
+run_in_background: true で複数 Bash を並列起動（worktree 隔離）:
+  Bash: just codex-run-isolated task-a
+  Bash: just codex-run-isolated task-b
   ↓
-完了通知が届いたら結果を確認
+完了通知が届いたら各 worktree の差分を確認:
+  cd .worktrees/task-a && git diff main
+  ↓
+取り込むものはマージ、不要なものは破棄:
+  git merge --no-ff codex/task-a
+  just codex-cleanup-isolated task-a
   ↓
 タスクファイルを削除:
   Bash: rm .tasks/task-a.md .tasks/task-b.md
 ```
+
+### worktree を使う / 使わないの判断
+
+| 状況 | 推奨 |
+|---|---|
+| 並列実行（複数 Codex / Agent 同時起動） | **必須**: `just codex-run-isolated` |
+| 単発で対話的に1タスクだけ進める | `just codex-run`（裸でよい） |
+| 失敗してもメインを汚したくない実験的変更 | `just codex-run-isolated` |
+| 1ファイル数行の小修正 | `just codex-run` または Claude が直接編集 |
+
+`.worktrees/` と `codex/*` ブランチは `.gitignore` 対象。並列実行後は `just codex-cleanup-isolated <name>` で必ず後始末する。
 
 ## Codex に委譲しないケース（Claude が直接対応）
 
