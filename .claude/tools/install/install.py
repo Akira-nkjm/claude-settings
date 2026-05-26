@@ -22,6 +22,8 @@ from pathlib import Path
 TARGETS = [
     ".claude",
     ".codex",
+    ".codegraph",
+    ".tasks",
     "CLAUDE.md",
     "AGENTS.md",
     "RULES.md",
@@ -33,6 +35,7 @@ TARGETS = [
 
 EXCLUDED_PARTS = {".git", "__pycache__", ".pytest_cache", ".mypy_cache"}
 EXCLUDED_PATHS = {".claude/sessions"}
+EXCLUDED_SUFFIXES = (".db", ".db-wal", ".db-shm", ".log")
 
 
 def is_enabled(name: str) -> bool:
@@ -111,6 +114,8 @@ def copy_directory(src_dir: Path, dst_dir: Path, label: str) -> None:
         rel = src.relative_to(src_dir)
         rel_label = f"{label}/{rel.as_posix()}"
         if any(part in EXCLUDED_PARTS for part in rel.parts) or rel_label in EXCLUDED_PATHS or rel_label.startswith(".claude/sessions/"):
+            continue
+        if src.name.endswith(EXCLUDED_SUFFIXES):
             continue
         copy_file(src, dst_dir / rel, rel_label)
 
