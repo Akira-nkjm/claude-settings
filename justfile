@@ -30,3 +30,12 @@ codex-new-task name:
 # 未処理タスク一覧
 codex-tasks:
     @ls .tasks/*.md 2>/dev/null || echo "no task"
+
+# CodeGraph index を作成・再構築する（初回または手動再構築時）
+# 通常はファイル監視で自動更新されるので不要
+codegraph-init:
+    npx -y @colbymchenry/codegraph init -i
+
+# CodeGraph の健康確認
+codegraph-status:
+    npx -y @colbymchenry/codegraph status

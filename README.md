@@ -39,7 +39,7 @@ $EDITOR .claude/rules/architecture.md  # データフロー・設計判断
 $EDITOR .claude/rules/commands.md      # セットアップ・テスト・ビルド
 
 # 3. CodeGraph index を作る（任意・初回のみ）
-npx -y @colbymchenry/codegraph init -i
+just codegraph-init
 
 # 4. Claude Code を起動して作業開始
 claude
@@ -55,6 +55,8 @@ claude
 | Codex タスクを作成 | `just codex-new-task <name>` |
 | Codex に実行を委譲 | `just codex-run <name>` |
 | 未処理タスク一覧 | `just codex-tasks` |
+| CodeGraph index を作成・再構築 | `just codegraph-init` |
+| CodeGraph 健康確認 | `just codegraph-status` |
 | Claude スキルを起動 | `/skill-name`（例: `/tdd-workflow`） |
 | 危険コマンド hook をテスト | `python3 .claude/tools/tests/test_dangerous_cmd.py` |
 
@@ -263,10 +265,10 @@ Codex CLI を単体で使う場合は [`.codex/README.md`](.codex/README.md) を
 
 ```bash
 # 初回 index 作成（リポジトリに .codegraph/ がない場合）
-npx -y @colbymchenry/codegraph init -i
+just codegraph-init
 
 # 健康確認
-npx -y @colbymchenry/codegraph status
+just codegraph-status
 ```
 
 `.mcp.json` に `codegraph serve --mcp` が登録済みなので、Claude Code 起動時に MCP サーバが自動で立ち上がる。`.codegraph/` が未初期化のままだと MCP ツール呼び出し時に未初期化エラーになるため、**最初の構造調査前に `init -i` を実行する**。以降はファイル監視で自動更新される。
