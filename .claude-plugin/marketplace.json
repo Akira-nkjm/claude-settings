@@ -1,0 +1,17 @@
+{
+  "name": "my-marketplace",
+  "owner": {
+    "name": "my-marketplace"
+  },
+  "metadata": {
+    "description": "Claude Code / Codex 共通設定マーケットプレイス。道具箱（commands / skills / hooks / MCP）をプラグインとして配布する。",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "my-plugin",
+      "source": "./plugins/my-plugin",
+      "description": "汎用の道具箱: read-pdf コマンド、汎用スキル群、安全フック群、codegraph MCP、/setup-project スキャフォルダ。プロジェクト固有のルールは含まない（/setup-project で各リポジトリに展開する）。"
+    }
+  ]
+}
