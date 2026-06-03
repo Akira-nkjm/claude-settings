@@ -11,7 +11,7 @@
     {
       "name": "my-plugin",
       "source": "./plugins/my-plugin",
-      "description": "汎用の道具箱: read-pdf コマンド、汎用スキル群、安全フック群、codegraph MCP、/setup-project スキャフォルダ。プロジェクト固有のルールは含まない（/setup-project で各リポジトリに展開する）。"
+      "description": "汎用の道具箱: 汎用スキル群、安全フック群、codegraph MCP、/setup-project スキャフォルダ。プロジェクト固有のルールは含まない（/setup-project で各リポジトリに展開する）。"
     }
   ]
 }

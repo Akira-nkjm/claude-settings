@@ -7,6 +7,10 @@ __pycache__/
 
 # 並列 Codex 実行用の git worktree
 .worktrees/
+.task/
 
 # codegraph のローカルインデックス（生成物）
 .codegraph/
+
+# セッション永続化フックの保存先（git 管理外。session_start/end・pre_compact が生成）
+.claude/sessions/

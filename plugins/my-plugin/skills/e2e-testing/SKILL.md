@@ -8,6 +8,10 @@ origin: community
 
 Comprehensive Playwright patterns for building stable, fast, and maintainable E2E test suites.
 
+## When to Activate
+
+Use this skill when writing or refactoring end-to-end / browser tests, setting up Playwright, designing Page Object Models, wiring E2E into CI/CD, managing test artifacts (traces/screenshots/videos), or diagnosing flaky tests. For unit/integration-level testing of a new feature, start with `tdd-workflow` and add this skill when browser-level scenarios are needed.
+
 ## Test File Organization
 
 ```

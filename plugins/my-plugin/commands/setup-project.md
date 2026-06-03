@@ -87,7 +87,7 @@ just -f .claude/justfile codex-run <task-name>
 
 ## 注意
 
-- 道具箱（read-pdf コマンド、各スキル、フック、codegraph MCP）は**プラグイン側で完結**しており、
+- 道具箱（各スキル、フック、codegraph MCP）は**プラグイン側で完結**しており、
   このコマンドでコピーする必要はない。物理的には `~/.claude/plugins/cache/.../my-plugin/` に住む。
 - フックはプラグインの hooks.json が自動適用される。`CLAUDE_SESSION_PERSIST=1` を設定すると
   セッション永続化フックが動く。

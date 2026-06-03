@@ -1,6 +1,6 @@
 ---
 name: markitdown
-description: Convert files to clean Markdown using Microsoft's markitdown CLI — PDF, Word (.docx), Excel (.xlsx), PowerPoint (.pptx), images, audio, HTML, CSV, JSON, XML, ZIP, EPub, and YouTube URLs. Use this whenever the user wants to turn a document, office file, spreadsheet, slide deck, image, or other non-text file into Markdown, extract its text/structure, or get its contents into a form an LLM can read. Trigger even if the user doesn't say "markitdown" — phrases like "convert this docx to markdown", "pull the text out of this PDF", "what's in this xlsx", or "ingest this file" all apply. For studying or page-by-page summarizing a PDF, prefer the /read-pdf command instead.
+description: Convert files to clean Markdown using Microsoft's markitdown CLI — PDF, Word (.docx), Excel (.xlsx), PowerPoint (.pptx), images, audio, HTML, CSV, JSON, XML, ZIP, EPub, and YouTube URLs. Use this whenever the user wants to turn a document, office file, spreadsheet, slide deck, image, or other non-text file into Markdown, extract its text/structure, or get its contents into a form an LLM can read. Trigger even if the user doesn't say "markitdown" — phrases like "convert this docx to markdown", "pull the text out of this PDF", "what's in this xlsx", or "ingest this file" all apply. To study or summarize a PDF, convert it with markitdown first, then summarize the resulting Markdown.
 origin: community
 ---
 
@@ -19,18 +19,9 @@ Reach for markitdown whenever you need the *contents* of a non-Markdown file as 
 - Archives and books — ZIP (recurses into contents), EPub
 - YouTube URLs (transcript + metadata)
 
-### markitdown vs. the `/read-pdf` command
+### Convert vs. summarize
 
-These look similar for PDFs but do different jobs — pick deliberately:
-
-| | **markitdown** (this skill) | **`/read-pdf`** command |
-|---|---|---|
-| What it does | Faithful 1:1 structural conversion to Markdown | Page-by-page **LLM summarization** + knowledge extraction |
-| Output | One Markdown file mirroring the source | Summaries written to `book_analysis/` |
-| Use when | You want the actual content to read, quote, diff, or feed downstream | You want to *study* or *digest* a long PDF/book |
-| Scope | Many formats | PDF only |
-
-If the user wants the real text/tables out of a file → markitdown. If they want it *explained or summarized* → `/read-pdf`.
+markitdown does a faithful 1:1 structural conversion to Markdown — it does **not** summarize. If the user wants the real text/tables out of a file → run markitdown. If they want it *explained or summarized* → convert with markitdown first, then summarize the resulting Markdown.
 
 ## How to run it
 
@@ -91,5 +82,5 @@ done
 
 - **Scanned/image-only PDFs** yield little or no text from offline conversion. If the user needs those, suggest Azure Document Intelligence (`-d -e <endpoint>`) or an OCR step — don't silently return an empty file.
 - **Large spreadsheets/decks** can produce very long Markdown. Write to a file rather than stdout, and summarize what you saw rather than echoing it all.
-- **Faithfulness, not summarization** — markitdown does not condense. If the user actually wanted a summary, convert first, then summarize the Markdown (or use `/read-pdf` for PDFs).
+- **Faithfulness, not summarization** — markitdown does not condense. If the user actually wanted a summary, convert first, then summarize the Markdown.
 - **Secrets** — when using Azure options, keep endpoints/keys out of committed files and out of chat output.
