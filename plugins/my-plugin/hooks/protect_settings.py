@@ -19,7 +19,19 @@ def protected_paths() -> set[Path]:
         (project_dir / ".claude" / "settings.json").resolve(),
         (project_dir / ".claude" / "settings.local.json").resolve(),
         (home / ".claude" / "settings.json").resolve(),
+        # home 側の local 設定も保護（フックの許可拡張・無効化を防ぐ）
+        (home / ".claude" / "settings.local.json").resolve(),
     }
+
+
+def protected_dirs() -> set[Path]:
+    """配下の編集を一律ブロックするディレクトリ（フック自身の改変防止）。"""
+    plugin_root = os.environ.get("CLAUDE_PLUGIN_ROOT")
+    dirs: set[Path] = set()
+    if plugin_root:
+        # このプラグインの hooks/ 配下（dangerous_cmd.py 等のガード本体）を保護
+        dirs.add((Path(plugin_root) / "hooks").resolve())
+    return dirs
 
 
 def main() -> int:
@@ -42,6 +54,12 @@ def main() -> int:
         warn(f"⛔ 設定ファイル ({candidate}) の直接編集はブロックされています。")
         warn("変更が必要な場合はユーザーが直接編集してください。")
         return 2
+
+    for protected in protected_dirs():
+        if candidate == protected or protected in candidate.parents:
+            warn(f"⛔ プラグインのフック ({candidate}) の編集はブロックされています。")
+            warn("ガードを変更する場合はマーケットプレイス正典 (plugins/my-plugin/hooks/) を直接編集してください。")
+            return 2
     return 0
 
 

@@ -38,8 +38,12 @@ RM_CRITICAL_TARGETS: list[tuple[re.Pattern[str], str]] = [
 
 RM_COMMAND = re.compile(r"(?<![\w-])rm\s+((?:-[^\s]+\s+)*)")
 
-# 一時ディレクトリ配下は使い捨て領域なので rm -rf を許可する（テスト用 temp の掃除など）
-TMP_PREFIXES = ("/tmp/", "/var/tmp/")
+# 一時ディレクトリ配下は使い捨て領域なので rm -rf を許可する（テスト用 temp の掃除など）。
+# ただし許可するのは「/tmp ・/var/tmp 配下の、シェルメタ文字を一切含まない素のパス」だけ。
+# 変数展開 /tmp/"$X"・グロブ /tmp/* ・コマンド置換などはこの正規表現に一致しないため拒否され、
+# 従来どおりブロックされる（静的文字列許可の穴を塞ぐ）。realpath/symlink は静的解決不能なので
+# これは「事故防止のガードレール」であり完全なセキュリティ境界ではない点に注意。
+SAFE_TMP_TARGET = re.compile(r"^/(?:tmp|var/tmp)/[A-Za-z0-9._/-]+$")
 
 # rm 呼び出し1回分（フラグ + 対象）をシェル区切りまで取り出す
 RM_INVOCATION = re.compile(r"(?<![\w-])rm\s+([^\n;|&]+)")
@@ -81,11 +85,7 @@ def rm_targets_all_under_tmp(command: str) -> bool:
         if not targets:
             return False
         for target in targets:
-            under_tmp = any(
-                target.startswith(prefix) and len(target) > len(prefix)
-                for prefix in TMP_PREFIXES
-            )
-            if not under_tmp or ".." in target:
+            if ".." in target or not SAFE_TMP_TARGET.match(target):
                 return False
     return saw_recursive_force
 
