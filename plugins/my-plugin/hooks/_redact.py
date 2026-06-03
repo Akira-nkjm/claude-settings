@@ -6,10 +6,15 @@ import re
 
 REDACTIONS: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"/Users/[^/\s]+"), "/Users/<redacted>"),
+    # Linux/WSL のホームディレクトリ（/home/<name> ・ /root）
+    (re.compile(r"/home/[^/\s]+"), "/home/<redacted>"),
     (re.compile(r"\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", re.IGNORECASE), "<redacted-email>"),
-    (re.compile(r"\b(?:sk|xoxb|xoxp|ghp|github_pat)_[A-Za-z0-9_\-]{12,}\b"), "<redacted-token>"),
+    (re.compile(r"\b(?:sk|xoxb|xoxp|ghp|github_pat|glpat)_[A-Za-z0-9_\-]{12,}\b"), "<redacted-token>"),
     (re.compile(r"\bsk-[A-Za-z0-9_\-]{12,}\b"), "<redacted-token>"),
     (re.compile(r"\bAKIA[0-9A-Z]{12,}\b"), "<redacted-token>"),
+    # Bearer トークン / JWT
+    (re.compile(r"(?i)\bBearer\s+[A-Za-z0-9._\-]+"), "Bearer <redacted-token>"),
+    (re.compile(r"\beyJ[A-Za-z0-9_\-]+\.[A-Za-z0-9_\-]+\.[A-Za-z0-9_\-]+"), "<redacted-jwt>"),
     (
         re.compile(
             r"(?i)\b(password|passwd|pwd|token|api[_-]?key|secret)\b\s*[:=]\s*['\"]?[^'\"\s,;]+"

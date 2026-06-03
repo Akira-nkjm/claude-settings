@@ -1,7 +1,7 @@
 {
   "name": "my-plugin",
   "version": "0.1.0",
-  "description": "汎用の道具箱: read-pdf コマンド、汎用スキル群、安全フック、codegraph MCP、/setup-project スキャフォルダ。",
+  "description": "汎用の道具箱: 汎用スキル群、安全フック、codegraph MCP、/setup-project スキャフォルダ。",
   "keywords": ["claude-code", "codex", "tdd", "security", "codegraph"],
   "hooks": "./hooks/hooks.json",
   "mcpServers": {

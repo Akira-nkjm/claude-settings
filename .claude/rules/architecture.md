@@ -27,7 +27,7 @@ Claude Code マーケットプレイス（`my-marketplace`）として `my-plugi
 
 - **`.claude-plugin/marketplace.json`** — マーケットプレイス定義（`name: my-marketplace`、収録プラグイン一覧）
 - **`plugins/my-plugin/.claude-plugin/plugin.json`** — プラグイン定義。hooks 参照 + codegraph MCP サーバ宣言
-- **`plugins/my-plugin/commands/`** — スラッシュコマンド（`read-pdf` / `setup-project`）
+- **`plugins/my-plugin/commands/`** — スラッシュコマンド（`setup-project`）
 - **`plugins/my-plugin/skills/`** — 13 スキル（各 `SKILL.md`）。find-skills / markitdown + ECC 由来
 - **`plugins/my-plugin/hooks/`** — `hooks.json` + Python フック群。安全（dangerous_cmd / protect_settings /
   _redact）・整形（autoformat）・セッション（session_start / session_end / pre_compact）
@@ -63,7 +63,7 @@ claude-settings/
 ├── .claude-plugin/marketplace.json     # マーケットプレイス定義（my-marketplace）
 ├── plugins/my-plugin/                   # 配布物（正典）
 │   ├── .claude-plugin/plugin.json       #   プラグイン定義 + codegraph MCP
-│   ├── commands/                        #   /read-pdf, /setup-project
+│   ├── commands/                        #   /setup-project
 │   ├── skills/                          #   13 スキル（*/SKILL.md）
 │   ├── hooks/                           #   hooks.json + Python フック群
 │   └── templates/                       #   /setup-project が展開する雛形

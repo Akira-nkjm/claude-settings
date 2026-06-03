@@ -17,6 +17,9 @@ from pathlib import Path
 
 PLUGIN_GLOB = "~/.claude/plugins/cache/openai-codex/codex/*/scripts/codex-companion.mjs"
 
+# task name は .tasks/<name>.md に展開されるため、path traversal・シェルメタ文字を禁止する
+TASK_NAME_RE = re.compile(r"^[A-Za-z0-9._-]+$")
+
 
 def version_key(path: Path) -> tuple[tuple[int, ...], str]:
     version = path.parent.parent.name
@@ -51,6 +54,9 @@ def main(argv: list[str]) -> int:
         return 1
 
     task_name = argv[1]
+    if not TASK_NAME_RE.match(task_name) or ".." in task_name:
+        print(f"不正なタスク名: {task_name}（英数字 . _ - のみ、.. 不可）", file=sys.stderr)
+        return 2
     prompt_file = Path(".tasks") / f"{task_name}.md"
     if not prompt_file.exists():
         print(f"タスクファイルが見つかりません: {prompt_file}", file=sys.stderr)
