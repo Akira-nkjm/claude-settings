@@ -41,9 +41,52 @@
 - **`security-review` は事後ではなく着手時に** … 認証・入力処理・秘密情報・決済の実装を
   「書き始める前」に呼ぶ。書き終えてからのレビューよりチェックリストが効く。
 
+## トークン効率の良い読み方（markitdown / read-pdf）
+
+大きいファイルを「生のまま」「丸ごと」読むとトークンを浪費する。**一度クリーンな
+Markdown に変換してから読む／grep する**のが基本。
+
+- **ページの多い PDF・Office 文書・スプレッドシート・画像 等** → まず `markitdown` で
+  Markdown 化する。書式ノイズが落ちて compact なテキストになり、そのまま読む／必要箇所だけ
+  grep できる。バイナリを直接読ませたりページを総当たりするより遥かに少ないトークンで済む。
+  - 対応: PDF / .docx / .xlsx / .pptx / 画像 / 音声 / HTML / CSV / JSON / XML / ZIP / EPub / YouTube URL
+- **使い分け**:
+  - とにかく中身をテキスト化して読みたい・抜き出したい → `markitdown`（軽量・一括変換）
+  - PDF を**ページ単位で精読し、知識点を抽出・要約・学習**したい → `/read-pdf`
+    （`book_analysis/` にページごとサマリーを生成。学習向けで、変換とは目的が違う）
+- **典型フロー**: `markitdown で .md 化` → 目次/見出しを掴む → 必要な節だけ Read/grep。
+  全文をコンテキストに載せない。長文なら要約してから次の作業に渡す。
+
+## codegraph の使い方（コードを書く前に引く）
+
+codegraph は **全シンボル・呼び出し関係・ファイルの SQLite 知識グラフ**。読み取りはサブミリ秒で、
+**コードを書く/直す前**に当たりを付けるために使う（書いている最中ではなく着手前）。
+
+- **初回だけ index を作る**: `just -f .claude/justfile codegraph-init`
+  （= `codegraph init -i`）。状態確認は `codegraph-status`。index はファイル監視で
+  約1秒遅れて追従する。
+- **原則: grep/Read のループより先に codegraph。** 構造的な問いは codegraph が
+  事前構築済みの検索インデックスなので、自前で grep+read を繰り返すより速く・正確で・
+  トークンも少ない。サブエージェントに探索を丸投げするのも二重作業。
+
+| 知りたいこと | ツール |
+|---|---|
+| 「X はどう動く？」「アーキは？」「どこにある？」「この辺を概観したい」 | `codegraph_explore`（**第一候補・まずこれ1回**。関連シンボルの**ソースをファイル別に verbatim 返却** = Read 相当。たいていこれだけで足りる） |
+| 「X から Y への流れ／経路」 | `codegraph_explore` に流れを跨ぐシンボル名を並べて渡す（コールバック等の動的ディスパッチも辿る） |
+| 「シンボル X の場所だけ知りたい」 | `codegraph_search` |
+| 「これを呼ぶのは？」「これは何を呼ぶ？」「変えたら何が壊れる？」 | `codegraph_callers` / `codegraph_callees` / `codegraph_impact` |
+| 「特定シンボルの完全なソース／オーバーロード名」 | `codegraph_node` |
+| 「ファイル一覧・構成」 | `codegraph_files` |
+| 「index は健康？」 | `codegraph_status` |
+
+- **`codegraph_explore` がほぼ唯一の入口**。自然文の質問でも、シンボル/ファイル名の羅列でも受ける。
+  足りない一点を確かめる時だけ生の Read/grep に降りる。
+- **codegraph が使えない環境**では `rg` / `rg --files` で代替し、「このセッションでは
+  codegraph MCP が露出していない」と明記する。
+
 ## 関連する道具（スキル以外）
 
 - `/read-pdf` — PDF をページ単位で精読し知識点を Markdown 要約（コマンド）
 - `/setup-project` — ルール一式・Codex 機械を展開（コマンド）
-- codegraph MCP — コード構造を調べる（コードを書く前に `codegraph_explore` で当たりを付ける）
+- codegraph MCP — 上記「codegraph の使い方」を参照
 - Codex 連携 — 実装の委譲は [`codex-workflow.md`](codex-workflow.md) を参照
