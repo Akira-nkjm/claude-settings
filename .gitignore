@@ -1,13 +1,12 @@
-# 実行中のタスクファイル（ディレクトリ自体は追跡）
-.tasks/*.md
+# OS / editor
+.DS_Store
 
-# セッションログ（個人ごと、共有しない）
-.claude/sessions/
+# Python キャッシュ（plugins/my-plugin/hooks の実行で生成）
+__pycache__/
+*.pyc
 
-# 並列 Codex 実行用の git worktree（codex-run-isolated が生成）
+# 並列 Codex 実行用の git worktree
 .worktrees/
 
-# codegraph の SQLite DB は .codegraph/.gitignore で管理される（リポジトリ自体は追跡）
-
-# グローバル gitignore の除外を上書き（設定管理リポジトリなので追跡する）
-!.claude/settings.local.json
+# codegraph のローカルインデックス（生成物）
+.codegraph/
