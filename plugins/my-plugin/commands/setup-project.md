@@ -16,7 +16,7 @@ allowed-tools: Bash(mkdir:*), Bash(cp:*), Bash(test:*), Bash(ls:*), Bash(touch:*
 
 | 種別 | 対象 | 既定動作 |
 |---|---|---|
-| **REFRESH（更新）** | 汎用ルール3本・Codex 機械（プラグインが正典） | **常に最新へ上書き** |
+| **REFRESH（更新）** | 汎用ルール4本・Codex 機械（プラグインが正典） | **常に最新へ上書き** |
 | **KEEP（保護）** | 固有ルール3本・ルート文書（あなたが編集する） | **既存があれば触らない** |
 
 `--force` を付けた場合のみ、KEEP 対象も上書きする。
@@ -40,6 +40,7 @@ allowed-tools: Bash(mkdir:*), Bash(cp:*), Bash(test:*), Bash(ls:*), Bash(touch:*
    refresh "$SRC/rules/git-workflow.md"   .claude/rules/git-workflow.md
    refresh "$SRC/rules/security.md"       .claude/rules/security.md
    refresh "$SRC/rules/codex-workflow.md" .claude/rules/codex-workflow.md
+   refresh "$SRC/rules/skills.md"         .claude/rules/skills.md
 
    # --- KEEP: プロジェクト固有（あなたが書く → 既存は保護） ---
    keep "$SRC/rules/project.md"      .claude/rules/project.md
