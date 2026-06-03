@@ -38,6 +38,12 @@ RM_CRITICAL_TARGETS: list[tuple[re.Pattern[str], str]] = [
 
 RM_COMMAND = re.compile(r"(?<![\w-])rm\s+((?:-[^\s]+\s+)*)")
 
+# 一時ディレクトリ配下は使い捨て領域なので rm -rf を許可する（テスト用 temp の掃除など）
+TMP_PREFIXES = ("/tmp/", "/var/tmp/")
+
+# rm 呼び出し1回分（フラグ + 対象）をシェル区切りまで取り出す
+RM_INVOCATION = re.compile(r"(?<![\w-])rm\s+([^\n;|&]+)")
+
 
 def has_recursive_force_rm(command: str) -> bool:
     """Return True only for rm invocations combining -r/-R and -f."""
@@ -48,6 +54,40 @@ def has_recursive_force_rm(command: str) -> bool:
         if has_recursive and has_force:
             return True
     return False
+
+
+def _strip_quotes(token: str) -> str:
+    if len(token) >= 2 and token[0] == token[-1] and token[0] in "\"'":
+        return token[1:-1]
+    return token
+
+
+def rm_targets_all_under_tmp(command: str) -> bool:
+    """再帰強制 rm が「すべて /tmp 配下の実パス」だけを対象にしているなら True。
+
+    1つでも tmp 配下でない対象、tmp ルートそのもの、`..` を含む対象、
+    変数展開（解決不能）が混じる場合は False（= 通常どおりブロック）。
+    """
+    saw_recursive_force = False
+    for match in RM_INVOCATION.finditer(command):
+        tokens = match.group(1).split()
+        flags = [t for t in tokens if t.startswith("-")]
+        has_recursive = any(("r" in f or "R" in f) for f in flags if f != "--")
+        has_force = any("f" in f for f in flags if f != "--")
+        if not (has_recursive and has_force):
+            continue
+        saw_recursive_force = True
+        targets = [_strip_quotes(t) for t in tokens if not t.startswith("-")]
+        if not targets:
+            return False
+        for target in targets:
+            under_tmp = any(
+                target.startswith(prefix) and len(target) > len(prefix)
+                for prefix in TMP_PREFIXES
+            )
+            if not under_tmp or ".." in target:
+                return False
+    return saw_recursive_force
 
 
 def main() -> int:
@@ -62,6 +102,9 @@ def main() -> int:
         return 0
 
     if has_recursive_force_rm(command):
+        # /tmp 配下だけを掃除する rm -rf は許可（使い捨て領域）
+        if rm_targets_all_under_tmp(command):
+            return 0
         warn("⚠️ 危険なコマンドを検知: ディレクトリの強制削除 (rm -rf 系)")
         warn(f"   コマンド: {command}")
         for target_pat, target_desc in RM_CRITICAL_TARGETS:
