@@ -1,31 +1,37 @@
 # .claude/justfile — Codex 連携レシピ
 #
 # このファイルは .claude/ 配下に置かれ、プロジェクト直下の justfile と衝突しない。
-# `set working-directory := '..'` により、各レシピはプロジェクトルートを cwd として実行される
-# （= .claude/tools/... や .tasks/ などの相対パスがそのまま解決される）。
+# 各レシピは `root`（このファイルのある .claude/ の親 = プロジェクトルート）を cwd として
+# 実行される（= .claude/tools/... や .tasks/ などの相対パスがそのまま解決される）。
 #
-# 使い方（プロジェクトルートから）:
-#   just -f .claude/justfile codex-run <task-name>
-# 毎回 -f を打つのが面倒なら shell alias を:
-#   alias jc='just -f .claude/justfile'   →  jc codex-run <task-name>
-# もしくはプロジェクト直下の justfile に  import '.claude/justfile'  を追記してもよい。
+# root は source_directory() から求める。これにより:
+#   - `just -f .claude/justfile <recipe>`           で直接呼んでも
+#   - プロジェクト直下の justfile に `import '.claude/justfile'` を書いて `just <recipe>` でも
+# cwd が同じくリポルートに揃う。（`set working-directory := '..'` は import すると基準が
+# ズレるため使わない。import ならレシピがフラットになりシェル補完も効くので推奨。）
+#
+# 使い方:
+#   just -f .claude/justfile codex-run <task-name>      # 直接
+#   alias jc='just -f .claude/justfile'                 # alias なら  jc codex-run <task-name>
+#   # 推奨: プロジェクト直下の justfile に  import '.claude/justfile'  → `just codex-run <task-name>`（補完あり）
 
-set working-directory := '..'
+root := source_directory() / '..'
 
 default:
-    @just -f .claude/justfile --list
+    @just -f "{{ source_directory() }}/justfile" --list
 
 # Codex にタスクファイルを渡して実行する
-# 使い方: just -f .claude/justfile codex-run <task-name>  (.tasks/<task-name>.md を渡す)
+# 使い方: just codex-run <task-name>  (.tasks/<task-name>.md を渡す)
 codex-run name:
-    @python3 .claude/tools/codex/run.py "{{ name }}"
+    @cd "{{ root }}" && python3 .claude/tools/codex/run.py "{{ name }}"
 
 # タスクファイルを新規作成する
-# 使い方: just -f .claude/justfile codex-new-task <task-name>
+# 使い方: just codex-new-task <task-name>
 # FORCE=1 で既存 .tasks/<task-name>.md の上書きを許可
 codex-new-task name:
     #!/usr/bin/env bash
     set -euo pipefail
+    cd "{{ root }}"
     mkdir -p .tasks
     task=".tasks/{{ name }}.md"
     if [ -e "$task" ] && [ "${FORCE:-0}" != "1" ]; then
@@ -37,14 +43,15 @@ codex-new-task name:
 
 # 未処理タスク一覧
 codex-tasks:
-    @ls .tasks/*.md 2>/dev/null || echo "no task"
+    @cd "{{ root }}" && (ls .tasks/*.md 2>/dev/null || echo "no task")
 
 # Codex を git worktree 隔離で実行する（並列実行時に推奨）
 # worktree: .worktrees/<task-name>/、branch: codex/<task-name>
-# 使い方: just -f .claude/justfile codex-run-isolated <task-name>
+# 使い方: just codex-run-isolated <task-name>
 codex-run-isolated name:
     #!/usr/bin/env bash
     set -euo pipefail
+    cd "{{ root }}"
     task=".tasks/{{ name }}.md"
     if [ ! -f "$task" ]; then
         echo "タスクファイルが見つかりません: $task" >&2
@@ -60,13 +67,14 @@ codex-run-isolated name:
     (cd "$wt" && python3 .claude/tools/codex/run.py "{{ name }}")
     echo "完了: $wt (branch: $branch)"
     echo "マージ例: git merge --no-ff $branch  または  cd $wt && git diff main"
-    echo "破棄例:   just -f .claude/justfile codex-cleanup-isolated {{ name }}"
+    echo "破棄例:   just codex-cleanup-isolated {{ name }}"
 
 # worktree とブランチを削除する
-# 使い方: just -f .claude/justfile codex-cleanup-isolated <task-name>
+# 使い方: just codex-cleanup-isolated <task-name>
 codex-cleanup-isolated name:
     #!/usr/bin/env bash
     set -euo pipefail
+    cd "{{ root }}"
     wt=".worktrees/{{ name }}"
     branch="codex/{{ name }}"
     if [ -d "$wt" ]; then
@@ -78,8 +86,24 @@ codex-cleanup-isolated name:
 # CodeGraph index を作成・再構築する（初回または手動再構築時）
 # 通常はファイル監視で自動更新されるので不要
 codegraph-init:
-    npx -y @colbymchenry/codegraph init -i
+    @cd "{{ root }}" && npx -y @colbymchenry/codegraph init -i
+
+# CodeGraph index を完全に再インデックスする
+codegraph-index:
+    @cd "{{ root }}" && npx -y @colbymchenry/codegraph index
+
+# CodeGraph index を差分更新する
+codegraph-sync:
+    @cd "{{ root }}" && npx -y @colbymchenry/codegraph sync
 
 # CodeGraph の健康確認
 codegraph-status:
-    npx -y @colbymchenry/codegraph status
+    @cd "{{ root }}" && npx -y @colbymchenry/codegraph status
+
+# CodeGraph MCP / watcher プロセスを停止する
+# 注意: パターンは "@colbymchenry/codegraph" に限定する。
+# `-f` はコマンドライン全体にマッチするため、"codegraph" だと
+# `just codegraph-stop` 自身にマッチして自滅し SIGTERM になる。
+codegraph-stop:
+    -pkill -f "@colbymchenry/codegraph"
+    @echo "codegraph processes stopped"
