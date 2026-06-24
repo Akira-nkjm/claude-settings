@@ -27,6 +27,10 @@
 | エージェントの挙動を評価駆動（EDD）で形式的に測りたい | `eval-harness` |
 | 長い作業の区切りで文脈を意図的に圧縮して保持したい | `strategic-compact` |
 | 「〜できるスキルある？」「どうやって X する？」と機能を探している | `find-skills` |
+| Google Drive のファイル/フォルダを一覧・検索・ダウンロード・共有する | `gws-drive`（前提: `gws-shared`） |
+| Google ドキュメント（Docs）の内容を読む／書く | `gws-docs` |
+| Google スライド（Slides）の内容を読む／書く | `gws-slides` |
+| Gmail / Google カレンダー / スプレッドシートを操作する | `gws-gmail` / `gws-calendar` / `gws-sheets` |
 
 ## 迷いやすい境界
 
@@ -40,6 +44,20 @@
   専用の PDF 精読コマンドは無いので「変換 → 必要箇所を読む → 要約」の流れで扱う。
 - **`security-review` は事後ではなく着手時に** … 認証・入力処理・秘密情報・決済の実装を
   「書き始める前」に呼ぶ。書き終えてからのレビューよりチェックリストが効く。
+- **`markitdown` と `gws-docs` / `gws-slides`** … 手元の**ローカルファイル**（PDF・docx 等）を
+  Markdown 化するなら `markitdown`。**Google Drive 上**の Docs / Slides をそのまま読む・編集するなら
+  `gws-docs` / `gws-slides`（Drive 上の Docs を一括テキスト化したいだけなら `gws drive files export` も可）。
+
+## gws（Google Workspace）スキルの前提
+
+`gws-*` スキルはすべて `gws` バイナリと OAuth 認証が前提（共通手順は `gws-shared` が正典）。
+
+- `gws` の導入と `gws auth setup` / `gws auth login` は dotfiles 側で管理する（このリポジトリの範囲外）。
+- 取り込み済みは Drive 読み取り用途を中心に **7 つ**（`gws-shared` / `gws-drive` / `gws-docs` /
+  `gws-slides` / `gws-gmail` / `gws-calendar` / `gws-sheets`）。これ以外のサービス・recipe・persona
+  （計 100+）は必要時に `npx skills add https://github.com/googleworkspace/cli/tree/main/skills/<name> -g -a claude-code`
+  で各自のユーザースコープ（`~/.claude/skills/`）に入れる（`my-plugin` には取り込まない）。
+- 書き込み・削除・送信系は実行前にユーザー確認を取る（`gws-shared` のセキュリティ規約）。
 
 ## トークン効率の良い読み方（markitdown）
 

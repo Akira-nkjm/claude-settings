@@ -28,7 +28,8 @@ Claude Code マーケットプレイス（`my-marketplace`）として `my-plugi
 - **`.claude-plugin/marketplace.json`** — マーケットプレイス定義（`name: my-marketplace`、収録プラグイン一覧）
 - **`plugins/my-plugin/.claude-plugin/plugin.json`** — プラグイン定義。hooks 参照 + codegraph MCP サーバ宣言
 - **`plugins/my-plugin/commands/`** — スラッシュコマンド（`setup-project`）
-- **`plugins/my-plugin/skills/`** — 13 スキル（各 `SKILL.md`）。find-skills / markitdown + ECC 由来
+- **`plugins/my-plugin/skills/`** — 20 スキル（各 `SKILL.md`）。find-skills / markitdown + ECC 由来 +
+  gws-* 7 つ（Google Workspace: Drive/Docs/Slides 読み込みほか、`origin: community`）
 - **`plugins/my-plugin/hooks/`** — `hooks.json` + Python フック群。安全（dangerous_cmd / protect_settings /
   _redact）・整形（autoformat）・セッション（session_start / session_end / pre_compact）
 - **`plugins/my-plugin/templates/`** — `/setup-project` が展開する雛形（**配布の正典**）。
@@ -64,7 +65,7 @@ claude-settings/
 ├── plugins/my-plugin/                   # 配布物（正典）
 │   ├── .claude-plugin/plugin.json       #   プラグイン定義 + codegraph MCP
 │   ├── commands/                        #   /setup-project
-│   ├── skills/                          #   13 スキル（*/SKILL.md）
+│   ├── skills/                          #   20 スキル（*/SKILL.md、gws-* 7 つ含む）
 │   ├── hooks/                           #   hooks.json + Python フック群
 │   └── templates/                       #   /setup-project が展開する雛形
 │       ├── CLAUDE.md / AGENTS.md / RULES.md / SOUL.md

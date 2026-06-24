@@ -117,7 +117,7 @@ plugins/
 └── my-plugin/
     ├── .claude-plugin/plugin.json   # プラグイン定義 + codegraph MCP
     ├── commands/             # /setup-project
-    ├── skills/               # 13 スキル（markitdown 含む）
+    ├── skills/               # 20 スキル（markitdown + gws-* 7 つ 含む）
     ├── hooks/                # hooks.json + フック群（${CLAUDE_PLUGIN_ROOT} 参照）
     └── templates/            # /setup-project が各プロジェクトに展開する雛形
         ├── CLAUDE.md / AGENTS.md / RULES.md / SOUL.md
@@ -236,7 +236,7 @@ cat ~/.claude/plugins/known_marketplaces.json      # 登録済みマーケット
 plugins/my-plugin/
 ├── .claude-plugin/plugin.json   # プラグイン定義 + codegraph MCP
 ├── commands/                 # /setup-project
-├── skills/                   # 13 スキル（find-skills / markitdown + ECC 由来）
+├── skills/                   # 20 スキル（find-skills / markitdown + ECC 由来 + gws-* 7 つ）
 ├── hooks/                    # hooks.json + フック群（${CLAUDE_PLUGIN_ROOT} 参照）
 └── templates/                # /setup-project が各プロジェクトに展開する雛形
     ├── CLAUDE.md / AGENTS.md / RULES.md / SOUL.md
@@ -377,9 +377,19 @@ Codex CLI を単体で使う場合は、`/setup-project` で展開される `.co
 /api-design                # REST API パターン
 /e2e-testing               # Playwright E2E パターン
 /find-skills <keyword>     # スキル探索
+/gws-drive                 # Google Drive のファイル/フォルダ操作（一覧・検索・DL・共有）
+/gws-docs                  # Google ドキュメントの読み込み/編集
+/gws-slides                # Google スライドの読み込み/編集
 ```
 
 スキルはエージェントが**プロアクティブに**起動することもある（description に書かれた発火条件に該当した場合）。
+
+> `gws-*` スキルは `gws`（Google Workspace CLI）バイナリと OAuth 認証が前提（共通手順は `gws-shared`）。
+> `gws` 本体の導入と `gws auth setup` / `gws auth login` は **dotfiles 側で管理**する（このリポの範囲外）。
+> 取り込み済みは Drive 読み取り用途中心の **7 つ**（`gws-shared` / `gws-drive` / `gws-docs` / `gws-slides` /
+> `gws-gmail` / `gws-calendar` / `gws-sheets`）。他のサービス・recipe・persona（計 100+）は
+> `npx skills add https://github.com/googleworkspace/cli/tree/main/skills/<name> -g -a claude-code` で
+> 各自のユーザースコープ（`~/.claude/skills/`）に入れる（`my-plugin` には取り込まない）。
 
 ### 5. CodeGraph で構造を調べる
 
